@@ -1,16 +1,15 @@
 package com.investments.httpapi.routes
 
-import com.investments.httpapi.models.*
-import io.ktor.application.Application
+import com.investments.httpapi.models.CategoryItem
+import com.investments.httpapi.models.categoriesStorage
 import io.ktor.application.*
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.request.*
-import io.ktor.response.respond
-import io.ktor.response.respondText
+import io.ktor.response.*
 import io.ktor.routing.*
 
 fun Route.categoriesRouting() {
-    route("/categories") {
+    route(Routes.CATEGORIES.getApiRoute()) {
         get {
             if (categoriesStorage.isNotEmpty()) {
                 call.respond(categoriesStorage)
@@ -41,6 +40,10 @@ fun Route.categoriesRouting() {
             // However, in production code we wouldn't be using mutable lists as a database!
             categoriesStorage.add(category)
             call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
+        }
+
+        patch("{id}") {
+            // Implement patch method of category here
         }
 
         delete("{id}") {

@@ -4,7 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.serialization.*
-import com.investments.httpapi.routes.registerCategoriesRoutes
+import com.investments.httpapi.routes.*
 
 fun main() {
     val envHttpExternalPort = System.getenv("HTTP_EXTERNAL_PORT")

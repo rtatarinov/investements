@@ -1,8 +1,8 @@
 package com.investments.httpapi.models
 
-import java.util.*
-import kotlinx.serialization.Serializable
 import com.investments.httpapi.utils.UUIDSerializer
+import kotlinx.serialization.Serializable
+import java.util.*
 
 @Serializable
 data class CategoryItem(

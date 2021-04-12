@@ -53,6 +53,7 @@ kotlin {
                 implementation("io.ktor:ktor-server-netty:$ktorVersion")
                 implementation("ch.qos.logback:logback-classic:1.2.3")
                 implementation("io.ktor:ktor-websockets:$ktorVersion")
+                implementation("io.ktor:ktor-server-tests:$ktorVersion")
             }
         }
 
