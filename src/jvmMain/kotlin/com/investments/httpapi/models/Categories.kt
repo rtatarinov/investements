@@ -11,7 +11,7 @@ data class CategoryItem(
     val id: UUID
 )
 
-val categoryStorage = listOf(
+val categoriesStorage = mutableListOf(
     CategoryItem("First Category", UUID.randomUUID()),
     CategoryItem("Second Category", UUID.randomUUID()),
     CategoryItem("Third Category", UUID.randomUUID()),
