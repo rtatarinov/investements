@@ -1,18 +1,37 @@
-package com.investments.httpapi.routes
+package com.investments.httpapi.domain.routes
 
-import com.investments.httpapi.models.CategoryItem
-import com.investments.httpapi.models.categoriesStorage
+import com.investments.httpapi.domain.category.Category
+import com.investments.httpapi.domain.category.CategoryRepository
+import com.investments.httpapi.domain.category.MemoryCategoryRepository
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.koin.dsl.module
+import org.koin.ktor.ext.inject
+import java.util.*
+
+val items = mutableListOf(
+    Category("1 category", UUID.randomUUID()),
+    Category("2 category", UUID.randomUUID()),
+    Category("3 category", UUID.randomUUID()),
+)
+
+val categoriesModule = module {
+    single<CategoryRepository> {
+        MemoryCategoryRepository(items)
+    }
+    single { MemoryCategoryRepository(items) }
+}
 
 fun Route.categoriesRouting() {
+    val categories: CategoryRepository by inject()
+
     route(Routes.CATEGORIES.getApiRoute()) {
         get {
-            if (categoriesStorage.isNotEmpty()) {
-                call.respond(categoriesStorage)
+            if (categories.getAll().isNotEmpty()) {
+                call.respond(categories.getAll())
             } else {
                 call.respondText("No categories found", status = HttpStatusCode.NotFound)
             }
@@ -24,7 +43,7 @@ fun Route.categoriesRouting() {
                 status = HttpStatusCode.BadRequest
             )
             val category =
-                categoriesStorage.find { it.id.toString() == id } ?: return@get call.respondText(
+                categories.findById(id) ?: return@get call.respondText(
                     "No customer with id $id",
                     status = HttpStatusCode.NotFound
                 )
@@ -33,12 +52,9 @@ fun Route.categoriesRouting() {
         }
 
         post {
-            val category = call.receive<CategoryItem>()
+            val category = call.receive<Category>()
 
-            // TODO - This shouldn't really be done in production as
-            // we should be accessing a mutable list in a thread-safe manner.
-            // However, in production code we wouldn't be using mutable lists as a database!
-            categoriesStorage.add(category)
+            categories.add(category)
             call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
         }
 
@@ -47,13 +63,7 @@ fun Route.categoriesRouting() {
         }
 
         delete("{id}") {
-            val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
-
-            if (categoriesStorage.removeIf { it.id.toString() == id }) {
-                call.respondText("Customer removed correctly", status = HttpStatusCode.Accepted)
-            } else {
-                call.respondText("Not Found", status = HttpStatusCode.NotFound)
-            }
+            // Implement delete method of category here
         }
     }
 }

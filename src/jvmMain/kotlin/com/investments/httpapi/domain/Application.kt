@@ -1,10 +1,12 @@
+import com.investments.httpapi.domain.routes.categoriesModule
+import com.investments.httpapi.domain.routes.registerCategoriesRoutes
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
+import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.serialization.*
-import com.investments.httpapi.routes.*
+import org.koin.ktor.ext.Koin
 
 fun main() {
     val envHttpExternalPort = System.getenv("HTTP_EXTERNAL_PORT")
@@ -13,6 +15,14 @@ fun main() {
     embeddedServer(Netty, port = httpExternalPort) {
         install(ContentNegotiation) {
             json()
+        }
+
+        install(DefaultHeaders)
+
+        install(CallLogging)
+
+        install(Koin) {
+            modules(categoriesModule)
         }
 
         install(CORS) {
