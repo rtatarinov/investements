@@ -42,28 +42,46 @@ fun Route.categoriesRouting() {
                 "Missing or malformed id",
                 status = HttpStatusCode.BadRequest
             )
-            val category =
+            val result =
                 categories.findById(id) ?: return@get call.respondText(
-                    "No customer with id $id",
+                    "No category with id $id",
                     status = HttpStatusCode.NotFound
                 )
 
-            call.respond(category)
+            call.respond(result)
         }
 
         post {
-            val category = call.receive<Category>()
+            val payload = call.receive<Category>()
+            val category = Category(payload.getName(), UUID.randomUUID())
 
             categories.add(category)
             call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
         }
 
         patch("{id}") {
-            // Implement patch method of category here
+            val id = call.parameters["id"] ?: return@patch call.respondText(
+                "Missing or malformed id",
+                status = HttpStatusCode.BadRequest
+            )
+
+            // Kotlin doesn't support partial classes. What type here?
+            val payload = call.receive<Category>()
+            val updatedCategory = categories.updateItemById(id, payload)
+
+            if (updatedCategory != null) {
+                call.respond(updatedCategory)
+            }
         }
 
         delete("{id}") {
-            // Implement delete method of category here
+            val id = call.parameters["id"] ?: return@delete call.respondText(
+                "Missing or malformed id",
+                status = HttpStatusCode.BadRequest
+            )
+
+            categories.removeById(id)
+            call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
         }
     }
 }

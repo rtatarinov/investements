@@ -6,7 +6,7 @@ import java.util.*
 
 @Serializable
 class Category(
-    private val name: String,
+    private var name: String,
     @Serializable(with = UUIDSerializer::class)
     private val id: UUID
 ) {
@@ -16,5 +16,9 @@ class Category(
 
     fun getName(): String {
         return this.name
+    }
+    
+    fun setName(value: String) {
+        this.name = value
     }
 }
