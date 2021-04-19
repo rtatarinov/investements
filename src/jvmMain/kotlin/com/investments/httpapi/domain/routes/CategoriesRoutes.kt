@@ -2,28 +2,13 @@ package com.investments.httpapi.domain.routes
 
 import com.investments.httpapi.domain.category.Category
 import com.investments.httpapi.domain.category.CategoryRepository
-import com.investments.httpapi.domain.category.MemoryCategoryRepository
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.koin.dsl.module
 import org.koin.ktor.ext.inject
 import java.util.*
-
-val items = mutableListOf(
-    Category("1 category", UUID.randomUUID()),
-    Category("2 category", UUID.randomUUID()),
-    Category("3 category", UUID.randomUUID()),
-)
-
-val categoriesModule = module {
-    single<CategoryRepository> {
-        MemoryCategoryRepository(items)
-    }
-    single { MemoryCategoryRepository(items) }
-}
 
 fun Route.categoriesRouting() {
     val categories: CategoryRepository by inject()

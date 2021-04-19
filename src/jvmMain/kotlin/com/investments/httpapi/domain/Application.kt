@@ -1,4 +1,3 @@
-import com.investments.httpapi.domain.routes.categoriesModule
 import com.investments.httpapi.domain.routes.registerCategoriesRoutes
 import io.ktor.application.*
 import io.ktor.features.*
@@ -7,6 +6,7 @@ import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.koin.ktor.ext.Koin
+import com.investments.httpapi.domain.category.*
 
 fun main() {
     val envHttpExternalPort = System.getenv("HTTP_EXTERNAL_PORT")
