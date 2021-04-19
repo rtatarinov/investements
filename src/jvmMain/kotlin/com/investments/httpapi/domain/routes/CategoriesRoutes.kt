@@ -1,7 +1,8 @@
 package com.investments.httpapi.domain.routes
 
-import com.investments.httpapi.domain.category.Category
-import com.investments.httpapi.domain.category.CategoryRepository
+import com.investments.httpapi.domain.category.*
+import com.investments.httpapi.domain.category.factory.CategoryViewFactory
+import com.investments.httpapi.domain.category.repository.CategoryRepository
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -15,23 +16,25 @@ fun Route.categoriesRouting() {
 
     route(Routes.CATEGORIES.getApiRoute()) {
         get {
-            if (categories.getAll().isNotEmpty()) {
-                call.respond(categories.getAll())
-            } else {
-                call.respondText("No categories found", status = HttpStatusCode.NotFound)
-            }
+            val result = categories.findAll()
+
+            call.respond(CategoryViewFactory().createList(result))
         }
 
         get("{id}") {
-            val id = call.parameters["id"] ?: return@get call.respondText(
-                "Missing or malformed id",
-                status = HttpStatusCode.BadRequest
-            )
-            val result =
+            val id = call.parameters["id"]
+                ?: return@get call.respondText(
+                    "Missing or malformed id",
+                    status = HttpStatusCode.BadRequest
+                )
+
+            val category =
                 categories.findById(id) ?: return@get call.respondText(
                     "No category with id $id",
                     status = HttpStatusCode.NotFound
                 )
+
+            val result = CategoryViewFactory().createSingle(category)
 
             call.respond(result)
         }
@@ -40,7 +43,7 @@ fun Route.categoriesRouting() {
             val payload = call.receive<Category>()
             val category = Category(payload.getName(), UUID.randomUUID())
 
-            categories.add(category)
+            categories.save(category)
             call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
         }
 
@@ -49,14 +52,9 @@ fun Route.categoriesRouting() {
                 "Missing or malformed id",
                 status = HttpStatusCode.BadRequest
             )
-
-            // Kotlin doesn't support partial classes. What type here?
             val payload = call.receive<Category>()
-            val updatedCategory = categories.updateItemById(id, payload)
 
-            if (updatedCategory != null) {
-                call.respond(updatedCategory)
-            }
+            categories.save(payload)
         }
 
         delete("{id}") {
@@ -65,8 +63,12 @@ fun Route.categoriesRouting() {
                 status = HttpStatusCode.BadRequest
             )
 
-            categories.removeById(id)
-            call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
+            val category = categories.findById(id);
+
+            if (category != null) {
+                categories.remove(category)
+                call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
+            }
         }
     }
 }

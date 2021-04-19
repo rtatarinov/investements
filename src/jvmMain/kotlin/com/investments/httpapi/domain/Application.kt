@@ -22,7 +22,7 @@ fun main() {
         install(CallLogging)
 
         install(Koin) {
-            modules(categoriesModule)
+            modules(CategoryModule().get())
         }
 
         install(CORS) {

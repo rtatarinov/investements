@@ -1,23 +1,19 @@
 package com.investments.httpapi.domain.category
 
-import com.investments.httpapi.domain.adapters.UUIDSerializer
-import kotlinx.serialization.Serializable
 import java.util.*
 
-@Serializable
-class Category(
+data class Category(
     private var name: String,
-    @Serializable(with = UUIDSerializer::class)
     private val id: UUID
 ) {
-    fun getId(): String {
-        return this.id.toString()
+    fun getId(): UUID {
+        return this.id
     }
 
     fun getName(): String {
         return this.name
     }
-    
+
     fun setName(value: String) {
         this.name = value
     }
