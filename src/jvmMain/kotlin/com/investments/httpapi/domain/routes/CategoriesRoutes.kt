@@ -1,27 +1,28 @@
 package com.investments.httpapi.domain.routes
 
-import com.investments.httpapi.domain.category.*
 import com.investments.httpapi.domain.category.factory.CategoryViewFactory
 import com.investments.httpapi.domain.category.repository.CategoryRepository
+import com.investments.httpapi.domain.category.request.CategoryRequest
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
 
 fun Route.categoriesRouting() {
     val categories: CategoryRepository by inject()
 
     route(Routes.CATEGORIES.getApiRoute()) {
         get {
-            val result = categories.findAll()
+            val categoryView = CategoryViewFactory()
+            val result = categoryView.createList(categories.findAll())
 
-            call.respond(CategoryViewFactory().createList(result))
+            call.respond(result)
         }
 
         get("{id}") {
+            val categoryView = CategoryViewFactory()
             val id = call.parameters["id"]
                 ?: return@get call.respondText(
                     "Missing or malformed id",
@@ -34,17 +35,20 @@ fun Route.categoriesRouting() {
                     status = HttpStatusCode.NotFound
                 )
 
-            val result = CategoryViewFactory().createSingle(category)
+            val result = categoryView.createSingle(category)
 
             call.respond(result)
         }
 
         post {
-            val payload = call.receive<Category>()
-            val category = Category(payload.getName(), UUID.randomUUID())
+            val payload = call.receive<CategoryRequest>()
+            val categoryRequest = CategoryRequest(payload.name)
+            val category = categoryRequest.getCategory()
+            val categoryView = CategoryViewFactory()
+            val result = categoryView.createSingle(category)
 
             categories.save(category)
-            call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
+            call.respond(status = HttpStatusCode.Created, result)
         }
 
         patch("{id}") {
@@ -52,9 +56,14 @@ fun Route.categoriesRouting() {
                 "Missing or malformed id",
                 status = HttpStatusCode.BadRequest
             )
-            val payload = call.receive<Category>()
+            val payload = call.receive<CategoryRequest>()
+            val categoryRequest = CategoryRequest(payload.name, id)
+            val category = categoryRequest.getCategory()
+            val categoryView = CategoryViewFactory()
+            val result = categoryView.createSingle(category)
 
-            categories.save(payload)
+            categories.save(category)
+            call.respond(status = HttpStatusCode.OK, result)
         }
 
         delete("{id}") {

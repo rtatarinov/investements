@@ -14,7 +14,7 @@ data class Category(
         return this.name
     }
 
-    fun setName(value: String) {
-        this.name = value
+    fun setName(name: String) {
+        this.name = name
     }
 }
