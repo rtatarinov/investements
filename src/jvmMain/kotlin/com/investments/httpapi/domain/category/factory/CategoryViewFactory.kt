@@ -6,11 +6,11 @@ import com.investments.httpapi.domain.category.view.CategoryView
 class CategoryViewFactory {
     fun createList(categories: List<Category>): List<CategoryView> {
         return categories.map {
-            CategoryView(it.getName(), it.getId())
+            CategoryView(it.name, it.id)
         }
     }
 
     fun createSingle(category: Category): CategoryView {
-        return CategoryView(category.getName(), category.getId())
+        return CategoryView(category.name, category.id)
     }
 }

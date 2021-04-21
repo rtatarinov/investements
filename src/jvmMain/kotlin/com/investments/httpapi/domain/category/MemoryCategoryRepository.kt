@@ -1,20 +1,13 @@
 package com.investments.httpapi.domain.category
 
 import com.investments.httpapi.domain.category.repository.CategoryRepository
+import java.util.*
 
 class MemoryCategoryRepository(initialCategories: List<Category>) : CategoryRepository {
     private val items = initialCategories.toMutableList();
 
-    private fun findIndexById(id: String): Int {
-        return this.items.indexOfFirst { it.getId().toString() === id }
-    }
-
-    private fun updateItemById(id: String, payload: Category): Category? {
-        val currentCategory = this.items.find { it.getId().toString() == id }
-
-        currentCategory?.setName(payload.getName())
-
-        return currentCategory
+    private fun findIndexById(id: UUID): Int {
+        return this.items.indexOfFirst { it.id.equals(id) }
     }
 
     override fun findAll(): List<Category> {
@@ -23,22 +16,16 @@ class MemoryCategoryRepository(initialCategories: List<Category>) : CategoryRepo
 
     override fun findById(id: String): Category? {
         return items.find {
-            it.getId().toString() == id
+            it.id.equals(UUID.fromString(id))
         }
     }
 
     override fun save(item: Category) {
-        val category = this.findById(item.getId().toString())
-
-        if (category == null) {
-            this.items.add(item)
-        } else {
-            this.updateItemById(category.getId().toString(), category)
-        }
+        this.items.add(item)
     }
 
     override fun remove(item: Category) {
-        val index = this.findIndexById(item.getId().toString())
+        val index = this.findIndexById(item.id)
 
         if (index != -1) {
             this.items.removeAt(index)

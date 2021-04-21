@@ -1,5 +1,6 @@
 package com.investments.httpapi.domain.routes
 
+import com.investments.httpapi.domain.category.factory.CategoryFactory
 import com.investments.httpapi.domain.category.factory.CategoryViewFactory
 import com.investments.httpapi.domain.category.repository.CategoryRepository
 import com.investments.httpapi.domain.category.request.CategoryRequest
@@ -43,12 +44,11 @@ fun Route.categoriesRouting() {
         post {
             val payload = call.receive<CategoryRequest>()
             val categoryRequest = CategoryRequest(payload.name)
-            val category = categoryRequest.getCategory()
-            val categoryView = CategoryViewFactory()
-            val result = categoryView.createSingle(category)
+            val category = CategoryFactory().create(categoryRequest)
+            val categoryView = CategoryViewFactory().createSingle(category)
 
             categories.save(category)
-            call.respond(status = HttpStatusCode.Created, result)
+            call.respond(status = HttpStatusCode.Created, categoryView)
         }
 
         patch("{id}") {
@@ -57,13 +57,21 @@ fun Route.categoriesRouting() {
                 status = HttpStatusCode.BadRequest
             )
             val payload = call.receive<CategoryRequest>()
-            val categoryRequest = CategoryRequest(payload.name, id)
-            val category = categoryRequest.getCategory()
-            val categoryView = CategoryViewFactory()
-            val result = categoryView.createSingle(category)
+            val category = categories.findById(id)
 
-            categories.save(category)
-            call.respond(status = HttpStatusCode.OK, result)
+            if (category != null) {
+                val categoryRequest = CategoryRequest(payload.name, id)
+                val updatedCategory = CategoryFactory().create(categoryRequest)
+                val categoryView = CategoryViewFactory().createSingle(updatedCategory)
+
+                category.replaceWith(updatedCategory)
+                call.respond(status = HttpStatusCode.Accepted, categoryView)
+            } else {
+                return@patch call.respondText(
+                    "Category with this id doesn't exists",
+                    status = HttpStatusCode.NotFound
+                )
+            }
         }
 
         delete("{id}") {
@@ -71,12 +79,16 @@ fun Route.categoriesRouting() {
                 "Missing or malformed id",
                 status = HttpStatusCode.BadRequest
             )
-
             val category = categories.findById(id);
 
             if (category != null) {
                 categories.remove(category)
                 call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
+            } else {
+                return@delete call.respondText(
+                    "Category with this id doesn't exists",
+                    status = HttpStatusCode.NotFound
+                )
             }
         }
     }
