@@ -1,4 +1,4 @@
-package com.investments.httpapi.domain.category
+package com.investments.httpapi.domain.entity
 
 import java.util.*
 

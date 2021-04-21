@@ -1,6 +1,6 @@
 package com.investments.httpapi.domain.category.repository
 
-import com.investments.httpapi.domain.category.Category
+import com.investments.httpapi.domain.entity.Category
 
 interface CategoryRepository {
     fun findAll(): List<Category>

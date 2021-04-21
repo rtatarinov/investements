@@ -1,4 +1,4 @@
-package com.investments.httpapi.domain.adapters
+package com.investments.httpapi.adapters
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

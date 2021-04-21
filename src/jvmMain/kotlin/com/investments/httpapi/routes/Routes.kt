@@ -1,4 +1,4 @@
-package com.investments.httpapi.domain.routes
+package com.investments.httpapi.routes
 
 enum class Routes(private val route: String) {
     CATEGORIES("/categories");

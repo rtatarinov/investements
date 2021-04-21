@@ -1,4 +1,4 @@
-package com.investments.httpapi.domain.routes
+package com.investments.httpapi.routes
 
 import com.investments.httpapi.domain.category.factory.CategoryFactory
 import com.investments.httpapi.domain.category.factory.CategoryViewFactory
@@ -16,29 +16,26 @@ fun Route.categoriesRouting() {
 
     route(Routes.CATEGORIES.getApiRoute()) {
         get {
-            val categoryView = CategoryViewFactory()
-            val result = categoryView.createList(categories.findAll())
+            val categoriesView = CategoryViewFactory().createList(categories.findAll())
 
-            call.respond(result)
+            call.respond(categoriesView)
         }
 
         get("{id}") {
-            val categoryView = CategoryViewFactory()
             val id = call.parameters["id"]
                 ?: return@get call.respondText(
                     "Missing or malformed id",
                     status = HttpStatusCode.BadRequest
                 )
-
             val category =
                 categories.findById(id) ?: return@get call.respondText(
                     "No category with id $id",
                     status = HttpStatusCode.NotFound
                 )
 
-            val result = categoryView.createSingle(category)
+            val categoryView = CategoryViewFactory().createSingle(category)
 
-            call.respond(result)
+            call.respond(categoryView)
         }
 
         post {
@@ -83,7 +80,7 @@ fun Route.categoriesRouting() {
 
             if (category != null) {
                 categories.remove(category)
-                call.respondText("Category stored correctly", status = HttpStatusCode.Accepted)
+                call.response.status(HttpStatusCode.NoContent)
             } else {
                 return@delete call.respondText(
                     "Category with this id doesn't exists",

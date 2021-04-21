@@ -1,6 +1,6 @@
 package com.investments.httpapi.domain.category.factory
 
-import com.investments.httpapi.domain.category.Category
+import com.investments.httpapi.domain.entity.Category
 import com.investments.httpapi.domain.category.request.CategoryRequest
 import java.util.*
 

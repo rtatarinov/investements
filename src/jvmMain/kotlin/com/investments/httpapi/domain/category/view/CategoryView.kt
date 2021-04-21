@@ -1,6 +1,6 @@
 package com.investments.httpapi.domain.category.view
 
-import com.investments.httpapi.domain.adapters.UUIDSerializer
+import com.investments.httpapi.adapters.UUIDSerializer
 import kotlinx.serialization.Serializable
 import java.util.*
 

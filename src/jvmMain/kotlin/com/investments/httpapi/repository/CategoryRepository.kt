@@ -1,9 +1,11 @@
-package com.investments.httpapi.domain.category
+package com.investments.httpapi.repository
 
 import com.investments.httpapi.domain.category.repository.CategoryRepository
+import com.investments.httpapi.domain.entity.Category
 import java.util.*
 
-class MemoryCategoryRepository(initialCategories: List<Category>) : CategoryRepository {
+class CategoryRepository(initialCategories: List<Category>) :
+    CategoryRepository {
     private val items = initialCategories.toMutableList();
 
     private fun findIndexById(id: UUID): Int {

@@ -1,4 +1,5 @@
-import com.investments.httpapi.domain.routes.registerCategoriesRoutes
+import com.investments.httpapi.config.ManualConfig
+import com.investments.httpapi.routes.registerCategoriesRoutes
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -6,7 +7,6 @@ import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.koin.ktor.ext.Koin
-import com.investments.httpapi.domain.category.*
 
 fun main() {
     val envHttpExternalPort = System.getenv("HTTP_EXTERNAL_PORT")
@@ -22,7 +22,7 @@ fun main() {
         install(CallLogging)
 
         install(Koin) {
-            modules(CategoryModule().get())
+            modules(ManualConfig().getCategoryModule())
         }
 
         install(CORS) {
