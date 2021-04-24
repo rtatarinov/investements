@@ -9,10 +9,15 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import jakarta.validation.Validation
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
 import org.koin.ktor.ext.inject
 
 fun Route.categoriesRouting() {
     val categories: CategoryRepository by inject()
+    val validator =
+        Validation.byDefaultProvider().configure().messageInterpolator(ParameterMessageInterpolator())
+            .buildValidatorFactory().validator
 
     route(Routes.CATEGORIES.getApiRoute()) {
         get {
@@ -41,11 +46,17 @@ fun Route.categoriesRouting() {
         post {
             val payload = call.receive<CategoryRequest>()
             val categoryRequest = CategoryRequest(payload.name)
-            val category = CategoryFactory().create(categoryRequest)
-            val categoryView = CategoryViewFactory().createSingle(category)
+            val constraintCategoryRequest = validator.validate(categoryRequest)
 
-            categories.save(category)
-            call.respond(status = HttpStatusCode.Created, categoryView)
+            if (constraintCategoryRequest.isEmpty()) {
+                val category = CategoryFactory().create(categoryRequest)
+                val categoryView = CategoryViewFactory().createSingle(category)
+
+                categories.save(category)
+                call.respond(status = HttpStatusCode.Created, categoryView)
+            } else {
+                call.respondText("not valid", status = HttpStatusCode.BadRequest)
+            }
         }
 
         patch("{id}") {
