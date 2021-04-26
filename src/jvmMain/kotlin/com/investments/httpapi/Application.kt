@@ -1,4 +1,4 @@
-import com.investments.httpapi.config.ManualConfig
+import com.investments.httpapi.config.CategoryConfig
 import com.investments.httpapi.routes.registerCategoriesRoutes
 import io.ktor.application.*
 import io.ktor.features.*
@@ -23,7 +23,10 @@ fun main() {
         install(CallLogging)
 
         install(Koin) {
-            modules(ManualConfig().getCategoryModule())
+            modules(CategoryConfig().getCategoryModule())
+            modules(CategoryConfig().getCategoryFactory())
+            modules(CategoryConfig().getCategoryViewFactory())
+            modules(CategoryConfig().getCategoryModifier())
         }
 
         install(StatusPages) {

@@ -17,10 +17,13 @@ import java.util.*
 
 fun Route.categoriesRouting() {
     val categories: CategoryRepository by inject()
+    val categoryViewFactory: CategoryViewFactory by inject()
+    val categoryFactory: CategoryFactory by inject()
+    val categoryModifier: CategoryModifier by inject()
 
     route(Routes.CATEGORIES.getApiRoute()) {
         get {
-            val categoriesView = CategoryViewFactory().createList(categories.findAll())
+            val categoriesView = categoryViewFactory.createList(categories.findAll())
 
             call.respond(categoriesView)
         }
@@ -37,7 +40,7 @@ fun Route.categoriesRouting() {
                     status = HttpStatusCode.NotFound
                 )
 
-            val categoryView = CategoryViewFactory().createSingle(category)
+            val categoryView = categoryViewFactory.createSingle(category)
 
             call.respond(categoryView)
         }
@@ -45,8 +48,8 @@ fun Route.categoriesRouting() {
         post {
             try {
                 val payload = call.receive<CategoryRequest>()
-                val category = CategoryFactory().create(payload)
-                val categoryView = CategoryViewFactory().createSingle(category)
+                val category = categoryFactory.create(payload)
+                val categoryView = categoryViewFactory.createSingle(category)
 
                 categories.save(category)
                 call.respond(status = HttpStatusCode.Created, categoryView)
@@ -69,8 +72,8 @@ fun Route.categoriesRouting() {
                     status = HttpStatusCode.NotFound
                 )
 
-            CategoryModifier().modify(category, payload)
-            call.respond(status = HttpStatusCode.OK, CategoryViewFactory().createSingle(category))
+            categoryModifier.modify(category, payload)
+            call.respond(status = HttpStatusCode.OK, categoryViewFactory.createSingle(category))
         }
 
         delete("{id}") {
