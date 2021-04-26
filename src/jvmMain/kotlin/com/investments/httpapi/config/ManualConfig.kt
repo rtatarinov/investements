@@ -12,16 +12,12 @@ class ManualConfig {
         Category("3 category", UUID.randomUUID()),
     )
 
-    private fun getCategoryMemoryModule(): Module {
+    fun getCategoryModule(): Module {
         return module {
             single<com.investments.httpapi.domain.category.repository.CategoryRepository> {
                 com.investments.httpapi.repository.CategoryRepository(memoryItems)
             }
             single { com.investments.httpapi.repository.CategoryRepository(memoryItems) }
         }
-    }
-
-    fun getCategoryModule(): Module {
-        return getCategoryMemoryModule()
     }
 }
