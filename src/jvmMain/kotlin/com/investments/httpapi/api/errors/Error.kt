@@ -1,6 +1,9 @@
 package com.investments.httpapi.api.errors
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Error(
-    val code: Int,
     val message: String,
+    val field: String,
 )

@@ -1,5 +1,7 @@
 package com.investments.httpapi.routes
 
+import com.investments.httpapi.api.errors.Error
+import com.investments.httpapi.api.errors.exceptions.InvalidException
 import com.investments.httpapi.domain.category.adapters.CategoryModifier
 import com.investments.httpapi.domain.category.factory.CategoryFactory
 import com.investments.httpapi.domain.category.factory.CategoryViewFactory
@@ -54,9 +56,12 @@ fun Route.categoriesRouting() {
                 categories.save(category)
                 call.respond(status = HttpStatusCode.Created, categoryView)
             } catch (exception: ConstraintViolationException) {
-                exception.constraintViolations.map { it.toMessage(locale = Locale.ENGLISH) }
-                    .map { "${it.property}: ${it.message}" }
-                    .forEach(::println)
+                val errors = exception.constraintViolations.map { it.toMessage(locale = Locale.ENGLISH) }
+                    .map {
+                        Error(it.message, it.property)
+                    }
+
+                throw InvalidException(errors)
             }
         }
 
