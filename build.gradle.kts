@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 val kotlinVersion = "1.4.0"
 val serializationVersion = "1.0.0-RC"
 val ktorVersion = "1.4.0"
+val koinVersion = "2.2.2"
 
 plugins {
     kotlin("multiplatform") version "1.4.0"
@@ -10,8 +11,7 @@ plugins {
     kotlin("plugin.serialization") version "1.4.0"
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 repositories {
     maven { setUrl("https://dl.bintray.com/kotlin/kotlin-eap") }
@@ -54,7 +54,8 @@ kotlin {
                 implementation("io.ktor:ktor-server-netty:$ktorVersion")
                 implementation("ch.qos.logback:logback-classic:1.2.3")
                 implementation("io.ktor:ktor-websockets:$ktorVersion")
-                implementation("org.litote.kmongo:kmongo-coroutine-serialization:4.1.1")
+                implementation("io.ktor:ktor-server-tests:$ktorVersion")
+                implementation("org.koin:koin-ktor:$koinVersion")
             }
         }
 
@@ -76,7 +77,7 @@ kotlin {
 }
 
 application {
-    mainClassName = "ServerKt"
+    mainClassName = "ApplicationKt"
 }
 
 // include JS artifacts in any JAR we generate
@@ -86,6 +87,7 @@ tasks.getByName<Jar>("jvmJar") {
     } else {
         "jsBrowserDevelopmentWebpack"
     }
+
     val webpackTask = tasks.getByName<KotlinWebpack>(taskName)
     dependsOn(webpackTask) // make sure JS gets compiled first
     from(File(webpackTask.destinationDirectory, webpackTask.outputFileName)) // bring output file along into the JAR
@@ -95,6 +97,22 @@ tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"
+        }
+    }
+
+    "run"(JavaExec::class) {
+        val fileContent = File("$projectDir/.env").readLines()
+
+        fileContent.forEach {
+            if (!it.isEmpty() && !it.startsWith("#")) {
+                val pos = it.indexOf("=")
+                val key = it.substring(0, pos)
+                val value = it.substring(pos + 1)
+
+                if (System.getenv(key) == null) {
+                    environment(key, value)
+                }
+            }
         }
     }
 }
