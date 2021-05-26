@@ -4,6 +4,7 @@ val kotlinVersion = "1.4.0"
 val serializationVersion = "1.0.0-RC"
 val ktorVersion = "1.4.0"
 val koinVersion = "2.2.2"
+val valiktorVersion = "0.12.0"
 
 plugins {
     kotlin("multiplatform") version "1.4.0"
@@ -56,6 +57,7 @@ kotlin {
                 implementation("io.ktor:ktor-websockets:$ktorVersion")
                 implementation("io.ktor:ktor-server-tests:$ktorVersion")
                 implementation("org.koin:koin-ktor:$koinVersion")
+                implementation("org.valiktor:valiktor-core:$valiktorVersion")
             }
         }
 

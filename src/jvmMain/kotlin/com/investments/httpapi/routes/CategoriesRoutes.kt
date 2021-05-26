@@ -1,5 +1,8 @@
 package com.investments.httpapi.routes
 
+import com.investments.httpapi.api.errors.Error
+import com.investments.httpapi.api.errors.exceptions.InvalidException
+import com.investments.httpapi.domain.category.adapters.CategoryModifier
 import com.investments.httpapi.domain.category.factory.CategoryFactory
 import com.investments.httpapi.domain.category.factory.CategoryViewFactory
 import com.investments.httpapi.domain.category.repository.CategoryRepository
@@ -10,13 +13,19 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import org.koin.ktor.ext.inject
+import org.valiktor.ConstraintViolationException
+import org.valiktor.i18n.toMessage
+import java.util.*
 
 fun Route.categoriesRouting() {
     val categories: CategoryRepository by inject()
+    val categoryViewFactory: CategoryViewFactory by inject()
+    val categoryFactory: CategoryFactory by inject()
+    val categoryModifier: CategoryModifier by inject()
 
     route(Routes.CATEGORIES.getApiRoute()) {
         get {
-            val categoriesView = CategoryViewFactory().createList(categories.findAll())
+            val categoriesView = categoryViewFactory.createList(categories.findAll())
 
             call.respond(categoriesView)
         }
@@ -33,19 +42,27 @@ fun Route.categoriesRouting() {
                     status = HttpStatusCode.NotFound
                 )
 
-            val categoryView = CategoryViewFactory().createSingle(category)
+            val categoryView = categoryViewFactory.createSingle(category)
 
             call.respond(categoryView)
         }
 
         post {
-            val payload = call.receive<CategoryRequest>()
-            val categoryRequest = CategoryRequest(payload.name)
-            val category = CategoryFactory().create(categoryRequest)
-            val categoryView = CategoryViewFactory().createSingle(category)
+            try {
+                val payload = call.receive<CategoryRequest>()
+                val category = categoryFactory.create(payload)
+                val categoryView = categoryViewFactory.createSingle(category)
 
-            categories.save(category)
-            call.respond(status = HttpStatusCode.Created, categoryView)
+                categories.save(category)
+                call.respond(status = HttpStatusCode.Created, categoryView)
+            } catch (exception: ConstraintViolationException) {
+                val errors = exception.constraintViolations.map { it.toMessage(locale = Locale.ENGLISH) }
+                    .map {
+                        Error(it.message, it.property)
+                    }
+
+                throw InvalidException(errors)
+            }
         }
 
         patch("{id}") {
@@ -55,20 +72,13 @@ fun Route.categoriesRouting() {
             )
             val payload = call.receive<CategoryRequest>()
             val category = categories.findById(id)
-
-            if (category != null) {
-                val categoryRequest = CategoryRequest(payload.name, id)
-                val updatedCategory = CategoryFactory().create(categoryRequest)
-                val categoryView = CategoryViewFactory().createSingle(updatedCategory)
-
-                category.replaceWith(updatedCategory)
-                call.respond(status = HttpStatusCode.Accepted, categoryView)
-            } else {
-                return@patch call.respondText(
+                ?: return@patch call.respondText(
                     "Category with this id doesn't exists",
                     status = HttpStatusCode.NotFound
                 )
-            }
+
+            categoryModifier.modify(category, payload)
+            call.respond(status = HttpStatusCode.OK, categoryViewFactory.createSingle(category))
         }
 
         delete("{id}") {
@@ -76,17 +86,13 @@ fun Route.categoriesRouting() {
                 "Missing or malformed id",
                 status = HttpStatusCode.BadRequest
             )
-            val category = categories.findById(id);
+            val category = categories.findById(id) ?: return@delete call.respondText(
+                "Category with this id doesn't exists",
+                status = HttpStatusCode.NotFound
+            );
 
-            if (category != null) {
-                categories.remove(category)
-                call.response.status(HttpStatusCode.NoContent)
-            } else {
-                return@delete call.respondText(
-                    "Category with this id doesn't exists",
-                    status = HttpStatusCode.NotFound
-                )
-            }
+            categories.remove(category)
+            call.response.status(HttpStatusCode.NoContent)
         }
     }
 }

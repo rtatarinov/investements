@@ -1,4 +1,4 @@
-package com.investments.httpapi.repository
+package com.investments.httpapi.category.repository
 
 import com.investments.httpapi.domain.category.repository.CategoryRepository
 import com.investments.httpapi.domain.entity.Category
