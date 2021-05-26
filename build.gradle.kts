@@ -5,6 +5,8 @@ val serializationVersion = "1.0.0-RC"
 val ktorVersion = "1.4.0"
 val koinVersion = "2.2.2"
 val valiktorVersion = "0.12.0"
+val exposedVersion = "0.31.1"
+val postgresqlVersion = "42.2.2"
 
 plugins {
     kotlin("multiplatform") version "1.4.0"
@@ -58,6 +60,10 @@ kotlin {
                 implementation("io.ktor:ktor-server-tests:$ktorVersion")
                 implementation("org.koin:koin-ktor:$koinVersion")
                 implementation("org.valiktor:valiktor-core:$valiktorVersion")
+                implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+                implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+                implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+                implementation("org.postgresql:postgresql:$postgresqlVersion")
             }
         }
 
